@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const initialWorkOrders = [
     {
@@ -9,9 +10,10 @@ const initialWorkOrders = [
         assignedTo: 'Unassigned',
         vendorCompany: '-',
         insuranceValidUntil: '-',
-        priority: 'Urgent',
-        status: 'Pending Assign',
-        due: 'Today'
+        priority: 'critical',
+        status: 'open',
+        due: 'Today',
+        source: 'Teacher Report'
     },
     {
         ticket: '#1040',
@@ -21,9 +23,10 @@ const initialWorkOrders = [
         assignedTo: 'Dana Plumb',
         vendorCompany: 'RapidFlow Plumbing',
         insuranceValidUntil: '2026-12-31',
-        priority: 'Urgent',
-        status: 'In Progress',
-        due: 'Tomorrow'
+        priority: 'critical',
+        status: 'in_progress',
+        due: 'Tomorrow',
+        source: 'Teacher Report'
     },
     {
         ticket: '#1038',
@@ -33,9 +36,10 @@ const initialWorkOrders = [
         assignedTo: 'Mark Rivera',
         vendorCompany: 'Northline Electric',
         insuranceValidUntil: '2026-09-15',
-        priority: 'Urgent',
-        status: 'In Progress',
-        due: 'Today'
+        priority: 'high',
+        status: 'assigned',
+        due: 'Today',
+        source: 'Secretary Walkthrough'
     },
     {
         ticket: '#1035',
@@ -45,19 +49,31 @@ const initialWorkOrders = [
         assignedTo: 'Sam Torres',
         vendorCompany: 'Campus Fix Services',
         insuranceValidUntil: '2027-02-01',
-        priority: 'Medium',
-        status: 'Scheduled',
-        due: 'Mar 20'
+        priority: 'medium',
+        status: 'triaged',
+        due: 'Mar 20',
+        source: 'Teacher Report'
     }
 ];
 
+const priorityRank = {
+    critical: 4,
+    high: 3,
+    medium: 2,
+    low: 1
+};
+
 const badgeTone = {
-    Urgent: 'text-bg-danger',
-    Medium: 'text-bg-warning',
-    Scheduled: 'text-bg-info',
-    'Pending Assign': 'text-bg-warning',
-    'In Progress': 'text-bg-primary',
-    Completed: 'text-bg-success'
+    critical: 'text-bg-danger',
+    high: 'text-bg-warning',
+    medium: 'text-bg-info',
+    low: 'text-bg-secondary',
+    open: 'text-bg-danger',
+    triaged: 'text-bg-warning',
+    assigned: 'text-bg-info',
+    in_progress: 'text-bg-primary',
+    resolved: 'text-bg-success',
+    verified: 'text-bg-success'
 };
 
 const vendors = [
@@ -93,6 +109,8 @@ const vendors = [
 const WorkOrdersPage = () => {
     const [workOrders, setWorkOrders] = useState(initialWorkOrders);
     const [selectedTicket, setSelectedTicket] = useState(initialWorkOrders[0].ticket);
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('urgency');
     const [vendorForm, setVendorForm] = useState({
         vendorName: '',
         contactName: '',
@@ -116,6 +134,24 @@ const WorkOrdersPage = () => {
         () => vendors.filter((v) => v.category === selectedOrder.category || v.category === 'General'),
         [selectedOrder.category]
     );
+
+    const visibleWorkOrders = useMemo(() => {
+        const filtered = statusFilter === 'all'
+            ? workOrders
+            : workOrders.filter((item) => item.status === statusFilter || item.priority === statusFilter);
+
+        const sorted = [...filtered];
+
+        if (sortBy === 'urgency') {
+            return sorted.sort((a, b) => (priorityRank[b.priority] || 0) - (priorityRank[a.priority] || 0));
+        }
+
+        if (sortBy === 'room') {
+            return sorted.sort((a, b) => a.room.localeCompare(b.room));
+        }
+
+        return sorted.sort((a, b) => a.ticket.localeCompare(b.ticket));
+    }, [sortBy, statusFilter, workOrders]);
 
     const handleVendorSelect = (value) => {
         const vendor = vendors.find((item) => item.name === value);
@@ -149,7 +185,7 @@ const WorkOrdersPage = () => {
                         assignedTo: vendorForm.contactName,
                         vendorCompany: vendorForm.vendorName,
                         insuranceValidUntil: vendorForm.insuranceValidUntil,
-                        status: 'In Progress'
+                        status: 'assigned'
                     }
                     : item
             )
@@ -163,14 +199,21 @@ const WorkOrdersPage = () => {
             <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
                 <div>
                     <h1 className="page-title mb-1">Work Orders and Vendor Dispatch</h1>
-                    <p className="text-secondary mb-0">A realistic school workflow: assign insured vendors, track SLAs, and retain audit-ready records</p>
+                    <p className="text-secondary mb-0">Manager view: assign insured vendors, enforce SLAs, and maintain complete records for audits and inspections.</p>
                 </div>
                 <div className="d-flex gap-2">
-                    <select className="form-select">
-                        <option>All Statuses</option>
-                        <option>Urgent</option>
-                        <option>In Progress</option>
-                        <option>Pending Assign</option>
+                    <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                        <option value="all">All</option>
+                        <option value="critical">Priority: critical</option>
+                        <option value="high">Priority: high</option>
+                        <option value="open">Status: open</option>
+                        <option value="assigned">Status: assigned</option>
+                        <option value="in_progress">Status: in_progress</option>
+                    </select>
+                    <select className="form-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                        <option value="urgency">Sort by priority</option>
+                        <option value="room">Sort by room</option>
+                        <option value="ticket">Sort by ticket</option>
                     </select>
                     <button className="btn btn-primary px-3">Export Readiness Summary</button>
                 </div>
@@ -178,8 +221,8 @@ const WorkOrdersPage = () => {
 
             <div className="card border-0 modern-card mb-4">
                 <div className="card-body">
-                    <h2 className="h5 fw-bold mb-2">Manager Value in This Demo</h2>
-                    <p className="text-secondary mb-0">This screen demonstrates why schools buy the platform: every maintenance ticket can be assigned to a licensed, insured vendor with documented cost, response SLA, and completion evidence.</p>
+                    <h2 className="h5 fw-bold mb-2">Operational Value for School Teams</h2>
+                    <p className="text-secondary mb-0">This screen shows why schools adopt the platform: teacher and secretary-identified issues are prioritized by urgency, then linked to licensed and insured vendors with response SLAs and completion evidence.</p>
                 </div>
             </div>
 
@@ -194,6 +237,7 @@ const WorkOrdersPage = () => {
                                         <tr>
                                             <th>Ticket</th>
                                             <th>Issue</th>
+                                            <th>Source</th>
                                             <th>Vendor</th>
                                             <th>Priority</th>
                                             <th>Status</th>
@@ -201,7 +245,7 @@ const WorkOrdersPage = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {workOrders.map((item) => (
+                                        {visibleWorkOrders.map((item) => (
                                             <tr
                                                 key={item.ticket}
                                                 onClick={() => setSelectedTicket(item.ticket)}
@@ -212,6 +256,7 @@ const WorkOrdersPage = () => {
                                                     <div className="fw-semibold">{item.issue}</div>
                                                     <div className="small text-secondary">{item.room} · {item.category}</div>
                                                 </td>
+                                                <td><span className="small text-secondary">{item.source}</span></td>
                                                 <td>
                                                     <div>{item.vendorCompany}</div>
                                                     <small className="text-secondary">Insurance: {item.insuranceValidUntil}</small>
@@ -236,11 +281,11 @@ const WorkOrdersPage = () => {
 
                             <div className="workflow-track mb-3">
                                 <div className="workflow-step done">Reported</div>
-                                <div className="workflow-step done">Reviewed</div>
-                                <div className="workflow-step active">Vendor Assigned</div>
-                                <div className="workflow-step">Repair</div>
-                                <div className="workflow-step">Verification</div>
-                                <div className="workflow-step">Closed</div>
+                                <div className="workflow-step done">Triaged</div>
+                                <div className="workflow-step active">Assigned</div>
+                                <div className="workflow-step">In Progress</div>
+                                <div className="workflow-step">Resolved</div>
+                                <div className="workflow-step">Verified</div>
                             </div>
 
                             <div className="row g-2">
@@ -305,6 +350,7 @@ const WorkOrdersPage = () => {
                     </div>
                 </div>
             </div>
+
         </div>
     );
 };

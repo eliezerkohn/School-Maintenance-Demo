@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Search } from 'lucide-react';
 import {
     calculateSeverityFromCodes,
     getCodesByCategory,
@@ -49,24 +50,30 @@ const ReportIssuePage = () => {
         <div>
             <div className="mb-4">
                 <h1 className="page-title mb-1">Report a Maintenance Issue</h1>
-                <p className="text-secondary mb-0">Teacher workflow for fast triage, vendor assignment, and inspection-readiness evidence</p>
+                <p className="text-secondary mb-0">Teacher view: report classroom issues quickly, link applicable codes, and trigger accurate severity scoring for faster triage.</p>
             </div>
 
             {submitted && (
-                <div className="alert alert-success border-0 shadow-sm" role="alert">
-                    <strong>Issue submitted successfully.</strong> Ticket #1042 created and Facilities Manager notified.
+                <div className="alert border-0 shadow-sm py-3" style={{ background: 'linear-gradient(120deg,#dcfce7,#d1fae5)', borderLeft: '4px solid #16a34a' }} role="alert">
+                    <div className="fw-bold text-success mb-1">Issue submitted — Ticket #1042 created</div>
+                    <div className="text-secondary small mb-2">Facilities manager has been notified. The ticket now appears in Work Orders for vendor dispatch.</div>
+                    <Link to="/work-orders" className="btn btn-success btn-sm px-3">
+                        View in Work Orders <ArrowRight size={13} className="ms-1" />
+                    </Link>
                 </div>
             )}
 
             <form onSubmit={submitReport}>
-                <div className="row g-3">
-                    <div className="col-12 col-xl-6">
-                        <div className="card border-0 shadow-sm mb-3">
-                            <div className="card-body">
-                                <h2 className="h5 fw-bold mb-3">Location and Category</h2>
+                <div className="card border-0 shadow-sm">
+                    <div className="card-body">
+                        <div className="row g-3">
+                            <div className="col-12">
+                                <h2 className="h5 fw-bold mb-2">Issue Details</h2>
+                            </div>
 
+                            <div className="col-12 col-md-6">
                                 <label className="form-label fw-semibold">Room / Location</label>
-                                <select className="form-select mb-3">
+                                <select className="form-select">
                                     <option>Room 203 (My Classroom)</option>
                                     <option>Hallway - 2nd Floor</option>
                                     <option>Restroom - 2nd Floor</option>
@@ -74,9 +81,11 @@ const ReportIssuePage = () => {
                                     <option>Cafeteria</option>
                                     <option>Library</option>
                                 </select>
+                            </div>
 
+                            <div className="col-12 col-md-6">
                                 <label className="form-label fw-semibold">Issue Category</label>
-                                <select className="form-select mb-3" value={issueCategory} onChange={(e) => setIssueCategory(e.target.value)}>
+                                <select className="form-select" value={issueCategory} onChange={(e) => setIssueCategory(e.target.value)}>
                                     <option>Safety / Fire Hazard</option>
                                     <option>Electrical</option>
                                     <option>Plumbing / Water</option>
@@ -87,56 +96,24 @@ const ReportIssuePage = () => {
                                     <option>Lighting</option>
                                     <option>Technology / AV</option>
                                 </select>
-
-                                <div className="d-flex justify-content-between align-items-center mb-2">
-                                    <label className="form-label fw-semibold mb-0">Regulation Codes</label>
-                                    <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setShowCodePopup(true)}>
-                                        <Search size={13} className="me-1" />Lookup and Select Codes
-                                    </button>
-                                </div>
-
-                                <div className="alert alert-secondary mb-3 small">
-                                    {selectedCodes.length === 0
-                                        ? 'No code selected yet. Select relevant regulation codes to score severity automatically.'
-                                        : `${selectedCodes.length} code(s) selected and linked to this issue.`}
-                                </div>
-
-                                <label className="form-label fw-semibold">Severity Level (Auto)</label>
-                                <div className="d-flex align-items-center gap-2">
-                                    <span className={`badge ${importanceBadge[autoSeverity.importance]}`}>{autoSeverity.level}</span>
-                                    <small className="text-secondary">Calculated from selected regulation importance</small>
-                                </div>
                             </div>
-                        </div>
 
-                        <div className="card border-0 shadow-sm">
-                            <div className="card-body">
-                                <h2 className="h5 fw-bold mb-3">Photo Evidence</h2>
-                                <button type="button" className="btn btn-outline-primary w-100 py-3 border-dashed" onClick={addPhoto}>
-                                    Add Photo
-                                </button>
-                                <div className="d-flex flex-wrap gap-2 mt-3">
-                                    {photoStamps.map((stamp, index) => (
-                                        <div key={`${stamp}-${index}`} className="photo-thumb">{stamp}</div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="col-12 col-xl-6">
-                        <div className="card border-0 shadow-sm mb-3">
-                            <div className="card-body">
-                                <h2 className="h5 fw-bold mb-3">Issue Description</h2>
+                            <div className="col-12">
                                 <label className="form-label fw-semibold">Issue Title</label>
-                                <input className="form-control mb-3" type="text" placeholder="Broken ceiling tile near window" />
+                                <input className="form-control" type="text" defaultValue="Broken Exit Sign – Room 104" />
+                            </div>
 
+                            <div className="col-12">
                                 <label className="form-label fw-semibold">Detailed Description</label>
-                                <textarea className="form-control mb-3" rows="4" placeholder="Describe what is broken and if there is a safety risk." />
+                                <textarea className="form-control" rows="4" defaultValue="The illuminated exit sign above the east hallway door has been dark for 3 days. This is a fire safety concern that impacts emergency egress visibility in the classroom." />
+                            </div>
 
+                            <div className="col-12 col-md-6">
                                 <label className="form-label fw-semibold">First Noticed</label>
-                                <input className="form-control mb-3" type="date" />
+                                <input className="form-control" type="date" defaultValue="2026-03-15" />
+                            </div>
 
+                            <div className="col-12 col-md-6">
                                 <label className="form-label fw-semibold">Impact on Class Operations</label>
                                 <select className="form-select">
                                     <option>No - room remains usable</option>
@@ -144,14 +121,44 @@ const ReportIssuePage = () => {
                                     <option>Yes - class relocated</option>
                                 </select>
                             </div>
-                        </div>
 
-                        <div className="card border-0 shadow-sm mb-3">
-                            <div className="card-body">
-                                <h2 className="h5 fw-bold mb-3">Building Code Flag</h2>
-                                {selectedCodes.length === 0 ? (
-                                    <p className="small text-secondary mb-0">No regulation codes linked yet. Use "Lookup and Select Codes" to attach applicable standards.</p>
-                                ) : (
+                            <div className="col-12 d-flex justify-content-between align-items-center">
+                                <label className="form-label fw-semibold mb-0">Regulation Codes</label>
+                                <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setShowCodePopup(true)}>
+                                    <Search size={13} className="me-1" />Lookup and Select Codes
+                                </button>
+                            </div>
+
+                            <div className="col-12">
+                                <div className="alert alert-secondary mb-0 small">
+                                    {selectedCodes.length === 0
+                                        ? 'No code selected yet.'
+                                        : `${selectedCodes.length} code(s) selected.`}
+                                </div>
+                            </div>
+
+                            <div className="col-12">
+                                <label className="form-label fw-semibold">Severity Level (Auto)</label>
+                                <div className="d-flex align-items-center gap-2">
+                                    <span className={`badge ${importanceBadge[autoSeverity.importance]}`}>{autoSeverity.level}</span>
+                                </div>
+                            </div>
+
+                            <div className="col-12">
+                                <label className="form-label fw-semibold">Photo Evidence</label>
+                                <button type="button" className="btn btn-outline-primary w-100 border-dashed" onClick={addPhoto}>
+                                    Add Photo
+                                </button>
+                                <div className="d-flex flex-wrap gap-2 mt-2">
+                                    {photoStamps.map((stamp, index) => (
+                                        <div key={`${stamp}-${index}`} className="photo-thumb">{stamp}</div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {selectedCodes.length > 0 && (
+                                <div className="col-12">
+                                    <label className="form-label fw-semibold">Selected Code Flags</label>
                                     <ul className="list-group list-group-flush">
                                         {regulationCodes
                                             .filter((item) => selectedCodes.includes(item.id))
@@ -165,11 +172,13 @@ const ReportIssuePage = () => {
                                                 </li>
                                             ))}
                                     </ul>
-                                )}
+                                </div>
+                            )}
+
+                            <div className="col-12">
+                                <button type="submit" className="btn btn-primary w-100">Submit Report</button>
                             </div>
                         </div>
-
-                        <button type="submit" className="btn btn-primary btn-lg w-100 rounded-pill">Submit Report</button>
                     </div>
                 </div>
             </form>

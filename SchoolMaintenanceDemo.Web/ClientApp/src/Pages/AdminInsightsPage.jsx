@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { AlertTriangle, BarChart3, Building2, CalendarClock, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 const monthlyTrend = [
@@ -37,9 +38,12 @@ const AdminInsightsPage = () => {
             <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
                 <div>
                     <h1 className="page-title mb-1">Admin Insights and Readiness Intelligence</h1>
-                    <p className="text-secondary mb-0">Shows where things break most often, how quickly repairs close, and whether the school is truly inspection-ready</p>
+                    <p className="text-secondary mb-0">Admin view: monitor failure frequency, repair performance, and inspection readiness across the campus.</p>
                 </div>
-                <button className="btn btn-primary px-4">Generate Board Summary</button>
+                <div className="d-flex gap-2">
+                    <Link to="/compliance-documents" className="btn btn-outline-secondary px-3">Upload Docs/Permits</Link>
+                    <button className="btn btn-primary px-4">Generate Board Summary</button>
+                </div>
             </div>
 
             <div className="card border-0 modern-card mb-4">
@@ -48,7 +52,7 @@ const AdminInsightsPage = () => {
                         <span className="glass-chip text-dark bg-light border">Demo Storyline</span>
                         <span className="glass-chip text-dark bg-light border">From classroom reports to predictable inspection outcomes</span>
                     </div>
-                    <p className="mb-0 text-secondary">This is the executive view clients care about: incident trend, repeat-failure hotspots, vendor performance, and evidence completeness before inspection day.</p>
+                    <p className="mb-0 text-secondary">This is the executive view clients care about: incident trends, repeat-failure hotspots, vendor performance, and evidence completeness before inspection day.</p>
                 </div>
             </div>
 
@@ -135,21 +139,30 @@ const AdminInsightsPage = () => {
                     <div className="card border-0 modern-card h-100">
                         <div className="card-body">
                             <h2 className="h5 fw-bold mb-3">Inspection Readiness Runway</h2>
-                            <div className="readiness-line mb-3">
+                            <div className="readiness-line bad mb-3">
                                 <span>Critical corrections still open</span>
-                                <strong>3</strong>
+                                <strong>3 remaining</strong>
                             </div>
-                            <div className="readiness-line mb-3">
+                            <div className="readiness-line warn mb-3">
                                 <span>Evidence package completeness</span>
-                                <strong>78%</strong>
+                                <div className="d-flex align-items-center gap-2">
+                                    <div className="mini-bar-track"><div className="mini-bar-fill warn" style={{ width: '78%' }} /></div>
+                                    <strong>78%</strong>
+                                </div>
                             </div>
-                            <div className="readiness-line mb-3">
+                            <div className="readiness-line good mb-3">
                                 <span>Vendor insurance verified</span>
-                                <strong>92%</strong>
+                                <div className="d-flex align-items-center gap-2">
+                                    <div className="mini-bar-track"><div className="mini-bar-fill" style={{ width: '92%' }} /></div>
+                                    <strong>92%</strong>
+                                </div>
                             </div>
-                            <div className="readiness-line">
+                            <div className="readiness-line good">
                                 <span>Projected inspection score</span>
-                                <strong>91%</strong>
+                                <div className="d-flex align-items-center gap-2">
+                                    <div className="mini-bar-track"><div className="mini-bar-fill" style={{ width: '91%' }} /></div>
+                                    <strong>91%</strong>
+                                </div>
                             </div>
 
                             <hr />
@@ -159,6 +172,10 @@ const AdminInsightsPage = () => {
                                 <li>Proves readiness with measurable trend and evidence data.</li>
                                 <li>Helps leadership budget preventive maintenance, not emergencies.</li>
                             </ul>
+                            <div className="mt-3 p-3 rounded" style={{ background: '#f0fdf4', border: '1px solid #86efac' }}>
+                                <div className="small fw-semibold text-success mb-1">Inspection in 13 days — March 30, 2026</div>
+                                <div className="small text-secondary">Close 3 remaining corrections and complete evidence coverage to reach the 95%+ target readiness score.</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -232,6 +249,7 @@ const AdminInsightsPage = () => {
                     </div>
                 </div>
             </div>
+
         </div>
     );
 };
